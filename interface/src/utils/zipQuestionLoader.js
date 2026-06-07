@@ -370,17 +370,25 @@ async function loadAfterQuestion(item) {
 }
 
 export async function loadBeforeQuestion(item) {
+    const packageBases = [
+        REVIEW_CONFIG.s3PackagesBase,
+        ...REVIEW_CONFIG.s3PackagesFallbackBases,
+    ]
+
     const candidateUrls = [
         item.original_zip_url?.startsWith('http') ? item.original_zip_url : null,
-        item.question_id ? `${REVIEW_CONFIG.s3PackagesBase}/${item.question_id}.zip` : null,
+        ...packageBases.map(base => (
+            item.question_id ? `${base.replace(/\/$/, '')}/${item.question_id}.zip` : null
+        )),
         item.original_zip_url,
         item.question_id ? `/redundant-review/original-packages/${item.question_id}.zip` : null,
         item.question_id ? `/redundant-review-original/${item.question_id}.zip` : null,
     ].filter(Boolean)
 
+    const uniqueCandidateUrls = [...new Set(candidateUrls)]
     let lastError = null
 
-    for (const url of candidateUrls) {
+    for (const url of uniqueCandidateUrls) {
         try {
             const questions = await loadQuestionsFromZipUrl(url, { useUploadedPackage: false })
             if (questions.length > 0) {

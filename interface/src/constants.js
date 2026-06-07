@@ -17,7 +17,11 @@ export const ENGINE_CONFIG = {
 
 export const REVIEW_CONFIG = {
     reviewOnly: import.meta.env.VITE_REVIEW_ONLY === 'true',
-    s3PackagesBase: import.meta.env.VITE_S3_PACKAGES_BASE || 'https://s3.us-east-1.amazonaws.com/qms.nagwa.com/packages',
+    s3PackagesBase: import.meta.env.VITE_S3_PACKAGES_BASE || 'https://s3.us-east-1.amazonaws.com/beta-qms.nagwa.com/packages',
+    s3PackagesFallbackBases: [
+        'https://s3.us-east-1.amazonaws.com/beta-qms.nagwa.com/packages',
+        'https://s3.us-east-1.amazonaws.com/qms.nagwa.com/packages',
+    ],
     manifestUrl: import.meta.env.VITE_REVIEW_MANIFEST_URL || '/redundant-review/structure/manifest.json',
 }
 
