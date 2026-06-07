@@ -310,18 +310,7 @@ export async function loadQuestionsFromZipFile(file) {
     return questions
 }
 
-export async function loadQuestionsFromZipUrl(zipUrl) {
-    if (hasReviewPackageFiles()) {
-        const storedBlob = getReviewPackageFile(zipUrl)
-        if (storedBlob) {
-            const fileName = String(zipUrl).split('/').pop() || 'question.zip'
-            const file = storedBlob instanceof File
-                ? storedBlob
-                : new File([storedBlob], fileName, { type: 'application/zip' })
-            return loadQuestionsFromZipFile(file)
-        }
-    }
-
+async function fetchQuestionsFromZipUrl(zipUrl) {
     const response = await fetch(zipUrl)
     if (!response.ok) {
         throw new Error(`Failed to fetch ${zipUrl}: HTTP ${response.status}`)
@@ -335,6 +324,25 @@ export async function loadQuestionsFromZipUrl(zipUrl) {
     const fileName = zipUrl.split('/').pop() || 'question.zip'
     const file = new File([blob], fileName, { type: 'application/zip' })
     return loadQuestionsFromZipFile(file)
+}
+
+export async function loadQuestionsFromZipUrl(zipUrl, options = {}) {
+    const { useUploadedPackage = true } = options
+    const zipUrlString = String(zipUrl)
+    const isRemoteUrl = /^https?:\/\//i.test(zipUrlString)
+
+    if (useUploadedPackage && !isRemoteUrl && hasReviewPackageFiles()) {
+        const storedBlob = getReviewPackageFile(zipUrlString)
+        if (storedBlob) {
+            const fileName = zipUrlString.split('/').pop() || 'question.zip'
+            const file = storedBlob instanceof File
+                ? storedBlob
+                : new File([storedBlob], fileName, { type: 'application/zip' })
+            return loadQuestionsFromZipFile(file)
+        }
+    }
+
+    return fetchQuestionsFromZipUrl(zipUrlString)
 }
 
 async function loadAfterQuestion(item) {
@@ -374,7 +382,7 @@ export async function loadBeforeQuestion(item) {
 
     for (const url of candidateUrls) {
         try {
-            const questions = await loadQuestionsFromZipUrl(url)
+            const questions = await loadQuestionsFromZipUrl(url, { useUploadedPackage: false })
             if (questions.length > 0) {
                 return questions[0]
             }

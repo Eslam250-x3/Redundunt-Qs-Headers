@@ -31,6 +31,11 @@ export function getReviewPackageFile(pathValue) {
     const normalizedPath = normalizePackagePath(pathValue)
     if (!normalizedPath) return null
 
+    // Never resolve remote URLs or original-package paths from uploaded output.
+    if (/^https?:\/\//i.test(String(pathValue)) || normalizedPath.includes('original-packages')) {
+        return null
+    }
+
     if (packageFiles.has(normalizedPath)) {
         return packageFiles.get(normalizedPath)
     }
@@ -51,14 +56,9 @@ export function getReviewPackageFile(pathValue) {
         return packageFiles.get(withStructurePrefix)
     }
 
-    const questionMatch = normalizedPath.match(/(\d{12})\.zip$/)
-    if (questionMatch) {
-        const questionId = questionMatch[1]
-        for (const [storedPath, blob] of packageFiles.entries()) {
-            if (storedPath.endsWith(`/${questionId}.zip`) || storedPath === `${questionId}.zip`) {
-                return blob
-            }
-        }
+    const fileName = normalizedPath.split('/').pop()
+    if (fileName && packageFiles.has(fileName)) {
+        return packageFiles.get(fileName)
     }
 
     return null

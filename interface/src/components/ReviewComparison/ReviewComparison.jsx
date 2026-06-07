@@ -23,16 +23,16 @@ function ReviewComparison({ comparison, onRenderStart, isHighlighted = false }) 
             <div className="review-comparison-grid">
                 <QuestionPreview
                     question={before}
-                    label="Before"
+                    label="Before (S3 original)"
                     previewKey={`${questionId}-before`}
                     displayQuestionId={questionId}
                     compact
-                    missingMessage={beforeError || 'Original package not available.'}
+                    missingMessage={beforeError || 'Original package not available from S3.'}
                     onRenderStart={onRenderStart}
                 />
                 <QuestionPreview
                     question={after}
-                    label="After"
+                    label="After (uploaded)"
                     previewKey={`${questionId}-after`}
                     displayQuestionId={questionId}
                     compact
