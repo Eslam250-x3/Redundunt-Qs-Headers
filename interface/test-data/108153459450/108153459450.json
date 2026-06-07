@@ -1,0 +1,50 @@
+{
+  "question_id": "108153459450",
+  "parent_id": "108153459450",
+  "language_code": "en",
+  "language": "English",
+  "country_code": "eg",
+  "country": "Egypt",
+  "subject": "Mathematics",
+  "subject_id": "564173215410",
+  "grade": "1",
+  "grade_id": "653130720580",
+  "section_id": "2232312312",
+  "source": "human",
+  "number_of_parts": 1,
+  "content": {
+    "parts": [
+      {
+        "n": 1,
+        "type": "mcq",
+        "stem": "<p><span style=\"white-space: pre-wrap;\">كانت الطفلة الصغيرة تخاف كثيرًا من </span><span data-node-type=\"blank-line\" data-node-variation=\"space\">&nbsp;</span><span style=\"white-space: pre-wrap;\">.<br><img data-notes=\"sdfsdfsd\" alt=\"ثقلثقل\" src=\"108153459450.01.png\"></span></p>",
+        "choices": [
+          {
+            "label": "A",
+            "value": "<p><span style=\"white-space: pre-wrap;\">الفراشات</span></p>",
+            "is_correct": true
+          },
+          {
+            "label": "B",
+            "value": "<p><span style=\"white-space: pre-wrap;\">القطط</span></p>",
+            "is_correct": false
+          },
+          {
+            "label": "C",
+            "value": "<p><span style=\"white-space: pre-wrap;\">الأصوات</span></p>",
+            "is_correct": false
+          },
+          {
+            "label": "D",
+            "value": "<p><span style=\"white-space: pre-wrap;\">الظَّلام</span></p>",
+            "is_correct": false
+          }
+        ],
+        "correct_answer": {
+          "label": "A",
+          "value": "<p><span style=\"white-space: pre-wrap;\">الفراشات</span></p>"
+        }
+      }
+    ]
+  }
+}

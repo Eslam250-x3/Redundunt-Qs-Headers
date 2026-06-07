@@ -1,0 +1,304 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { BookOpen, LoaderCircle, Upload } from 'lucide-react'
+import { REVIEW_CONFIG } from '../../constants'
+import {
+    loadReviewManifestFromFile,
+    loadReviewPackageFromZipFile,
+} from '../../utils/reviewPackageLoader'
+import { clearReviewPackageStore } from '../../utils/reviewPackageStore'
+import { fetchReviewManifest, loadReviewComparison } from '../../utils/zipQuestionLoader'
+import './ReviewPanel.css'
+
+const BATCH_SIZE = 10
+
+function ReviewPanel({ onQuestionsLoaded, onLoadingChange, onSelectionChange }) {
+    const [manifest, setManifest] = useState(null)
+    const [manifestError, setManifestError] = useState('')
+    const [packageLabel, setPackageLabel] = useState('')
+    const [packageQuestionCount, setPackageQuestionCount] = useState(0)
+    const [isUploadingPackage, setIsUploadingPackage] = useState(false)
+    const [selectedSubject, setSelectedSubject] = useState('')
+    const [selectedGrade, setSelectedGrade] = useState('')
+    const [loadedCount, setLoadedCount] = useState(0)
+    const [isLoadingQuestions, setIsLoadingQuestions] = useState(false)
+    const [loadError, setLoadError] = useState('')
+    const packageInputRef = useRef(null)
+
+    useEffect(() => {
+        if (REVIEW_CONFIG.reviewOnly) {
+            return
+        }
+
+        let cancelled = false
+
+        async function loadManifest() {
+            try {
+                const data = await fetchReviewManifest()
+                if (!cancelled) {
+                    setManifest(data)
+                    setManifestError('')
+                    setPackageLabel('Local review data')
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setManifestError(error.message || 'Failed to load review manifest.')
+                }
+            }
+        }
+
+        loadManifest()
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const selectedSubjectData = useMemo(
+        () => manifest?.subjects?.find(subject => subject.name === selectedSubject) || null,
+        [manifest, selectedSubject],
+    )
+
+    const selectedGradeData = useMemo(
+        () => selectedSubjectData?.grades?.find(grade => grade.name === selectedGrade) || null,
+        [selectedSubjectData, selectedGrade],
+    )
+
+    const totalQuestions = selectedGradeData?.question_count || 0
+    const remainingQuestions = Math.max(totalQuestions - loadedCount, 0)
+
+    useEffect(() => {
+        if (selectedSubject && selectedGrade) {
+            onSelectionChange?.(`${selectedSubject} / Grade ${selectedGrade}`)
+        } else {
+            onSelectionChange?.('')
+        }
+    }, [selectedSubject, selectedGrade, onSelectionChange])
+
+    const resetSelectionState = useCallback(() => {
+        setLoadedCount(0)
+        setLoadError('')
+        onQuestionsLoaded([])
+    }, [onQuestionsLoaded])
+
+    useEffect(() => {
+        resetSelectionState()
+    }, [selectedSubject, selectedGrade, resetSelectionState])
+
+    const handlePackageUpload = useCallback(async (file) => {
+        if (!file) return
+
+        setIsUploadingPackage(true)
+        setManifestError('')
+        setLoadError('')
+
+        try {
+            const result = file.name.endsWith('.json')
+                ? await loadReviewManifestFromFile(file)
+                : await loadReviewPackageFromZipFile(file)
+
+            setManifest(result.manifest)
+            setPackageLabel(result.fileName)
+            setPackageQuestionCount(result.questionZipCount)
+            setSelectedSubject('')
+            setSelectedGrade('')
+            resetSelectionState()
+        } catch (error) {
+            clearReviewPackageStore()
+            setManifest(null)
+            setPackageLabel('')
+            setPackageQuestionCount(0)
+            setManifestError(error.message || 'Failed to load review package.')
+        } finally {
+            setIsUploadingPackage(false)
+        }
+    }, [resetSelectionState])
+
+    const handlePackageInputChange = useCallback((event) => {
+        const file = event.target.files?.[0]
+        if (file) {
+            handlePackageUpload(file)
+        }
+        event.target.value = ''
+    }, [handlePackageUpload])
+
+    const loadNextBatch = useCallback(async () => {
+        if (!selectedGradeData || isLoadingQuestions) return
+
+        const batch = selectedGradeData.questions.slice(loadedCount, loadedCount + BATCH_SIZE)
+        if (batch.length === 0) return
+
+        setIsLoadingQuestions(true)
+        onLoadingChange(true)
+        setLoadError('')
+
+        try {
+            const loadedComparisons = []
+
+            for (const item of batch) {
+                loadedComparisons.push(await loadReviewComparison(item))
+            }
+
+            setLoadedCount(previous => previous + batch.length)
+            onQuestionsLoaded(previousComparisons => [...previousComparisons, ...loadedComparisons])
+        } catch (error) {
+            setLoadError(error.message || 'Failed to load question packages.')
+        } finally {
+            setIsLoadingQuestions(false)
+            onLoadingChange(false)
+        }
+    }, [
+        selectedGradeData,
+        isLoadingQuestions,
+        loadedCount,
+        onQuestionsLoaded,
+        onLoadingChange,
+    ])
+
+    return (
+        <div className="review-panel glass-card">
+            <div className="review-panel-header">
+                <BookOpen size={22} strokeWidth={2.5} />
+                <div>
+                    <h3>Review Cleanup</h3>
+                    <p>
+                        Upload the output review ZIP, then compare cleaned packages against the original packages on S3.
+                    </p>
+                </div>
+            </div>
+
+            <div className="review-upload-block">
+                <button
+                    type="button"
+                    className="review-upload-btn"
+                    onClick={() => packageInputRef.current?.click()}
+                    disabled={isUploadingPackage}
+                >
+                    {isUploadingPackage ? (
+                        <>
+                            <LoaderCircle className="spin-icon" size={18} />
+                            Loading review package...
+                        </>
+                    ) : (
+                        <>
+                            <Upload size={18} />
+                            Upload review package ZIP
+                        </>
+                    )}
+                </button>
+                <input
+                    ref={packageInputRef}
+                    type="file"
+                    accept=".zip,.json,application/zip,application/json"
+                    onChange={handlePackageInputChange}
+                    hidden
+                />
+                <p className="review-upload-hint">
+                    Expected contents: `structure/manifest.json` and cleaned question ZIP files.
+                </p>
+                {packageLabel && (
+                    <div className="review-package-summary">
+                        <div className="review-summary-row">
+                            <span>Loaded package</span>
+                            <strong>{packageLabel}</strong>
+                        </div>
+                        {packageQuestionCount > 0 && (
+                            <div className="review-summary-row">
+                                <span>Question ZIP files</span>
+                                <strong>{packageQuestionCount}</strong>
+                            </div>
+                        )}
+                        <div className="review-summary-row">
+                            <span>Before source</span>
+                            <strong>S3</strong>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {manifestError ? (
+                <div className="review-message review-message-error">{manifestError}</div>
+            ) : manifest ? (
+                <>
+                    <label className="review-field">
+                        <span>Subject</span>
+                        <select
+                            value={selectedSubject}
+                            onChange={(event) => {
+                                setSelectedSubject(event.target.value)
+                                setSelectedGrade('')
+                            }}
+                        >
+                            <option value="">Choose subject</option>
+                            {(manifest?.subjects || []).map(subject => (
+                                <option key={subject.name} value={subject.name}>
+                                    {subject.name} ({subject.question_count})
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className="review-field">
+                        <span>Grade</span>
+                        <select
+                            value={selectedGrade}
+                            onChange={(event) => setSelectedGrade(event.target.value)}
+                            disabled={!selectedSubjectData}
+                        >
+                            <option value="">Choose grade</option>
+                            {(selectedSubjectData?.grades || []).map(grade => (
+                                <option key={grade.name} value={grade.name}>
+                                    {grade.name} ({grade.question_count})
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    {selectedGradeData && (
+                        <div className="review-summary">
+                            <div className="review-summary-row">
+                                <span>Questions in selection</span>
+                                <strong>{totalQuestions}</strong>
+                            </div>
+                            <div className="review-summary-row">
+                                <span>Loaded for preview</span>
+                                <strong>{loadedCount}</strong>
+                            </div>
+                        </div>
+                    )}
+
+                    {loadError && (
+                        <div className="review-message review-message-error">{loadError}</div>
+                    )}
+
+                    <button
+                        className="btn btn-primary w-full review-load-btn"
+                        onClick={loadNextBatch}
+                        disabled={!selectedGradeData || isLoadingQuestions || remainingQuestions === 0}
+                    >
+                        {isLoadingQuestions ? (
+                            <>
+                                <LoaderCircle className="spin-icon" size={18} />
+                                Loading questions...
+                            </>
+                        ) : loadedCount === 0 ? (
+                            `Load first ${Math.min(BATCH_SIZE, totalQuestions)} questions`
+                        ) : remainingQuestions > 0 ? (
+                            `Load ${Math.min(BATCH_SIZE, remainingQuestions)} more`
+                        ) : (
+                            'All questions loaded'
+                        )}
+                    </button>
+                </>
+            ) : !REVIEW_CONFIG.reviewOnly ? (
+                <div className="review-message">
+                    Upload a review package ZIP, or run the tool locally to serve `data/output`.
+                </div>
+            ) : (
+                <div className="review-message">
+                    Upload a review package ZIP to start reviewing.
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default ReviewPanel

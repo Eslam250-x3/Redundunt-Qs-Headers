@@ -1,0 +1,24 @@
+.review-question-list .question-item {
+  min-height: 64px;
+}
+
+.review-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-normal);
+}
+
+.review-copy-btn:hover {
+  color: var(--primary-600);
+  border-color: var(--primary-500);
+  background: var(--primary-100);
+}

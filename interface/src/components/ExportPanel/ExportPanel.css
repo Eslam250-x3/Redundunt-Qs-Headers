@@ -1,0 +1,122 @@
+.export-panel {
+    padding: var(--space-lg);
+    margin-top: var(--space-lg);
+}
+
+.export-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.export-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.export-icon {
+    color: var(--primary-500);
+}
+
+/* Sections */
+.export-section {
+    margin-bottom: var(--space-lg);
+}
+
+.section-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.export-divider {
+    height: 1px;
+    background: var(--border-secondary);
+    margin: var(--space-lg) 0;
+}
+
+/* Buttons */
+.export-buttons {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    flex: 1;
+    justify-content: center;
+    min-height: 48px;
+}
+
+.btn-export:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--primary-500);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.btn-export:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-export.btn-primary {
+    background: var(--primary-500);
+    border-color: var(--primary-500);
+    color: var(--text-on-primary);
+}
+
+.btn-export.btn-primary:hover:not(:disabled) {
+    background: var(--primary-600);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-export.btn-full {
+    flex: 1 1 100%;
+}
+
+.btn-icon {
+    font-size: 1.125rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: var(--space-xs) 0.5rem;
+    background: var(--success-bg);
+    color: var(--success);
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .export-panel {
+        padding: var(--space-md);
+    }
+
+    .btn-export {
+        padding: var(--space-sm);
+        font-size: 0.8125rem;
+    }
+}

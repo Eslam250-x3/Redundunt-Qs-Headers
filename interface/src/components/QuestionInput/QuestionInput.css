@@ -1,0 +1,132 @@
+/* ===================================
+   Question Input Styles
+   =================================== */
+
+.question-input {
+    padding: var(--space-lg);
+}
+
+.input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.input-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.input-mode-toggle {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    gap: 4px;
+}
+
+.mode-btn {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mode-btn.active {
+    background: var(--primary-500);
+    color: var(--text-on-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.mode-btn:hover:not(.active) {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+/* Drop Zone */
+.question-input .drop-zone {
+    padding: var(--space-xl);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+}
+
+.drop-icon {
+    color: var(--primary-400);
+    margin-bottom: var(--space-sm);
+}
+
+.drop-text {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.drop-hint {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.drop-formats {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: var(--space-xs) var(--space-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-sm);
+    font-weight: 500;
+}
+
+/* Loading State */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.loading-indicator span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-secondary);
+    border-top-color: var(--primary-500);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* JSON Input */
+.json-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.json-input-area textarea {
+    resize: vertical;
+    min-height: 150px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    direction: ltr;
+}

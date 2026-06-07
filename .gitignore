@@ -1,0 +1,18 @@
+# Dependencies and build output
+node_modules/
+dist/
+interface/dist/
+interface/node_modules/
+
+# Local data and large review bundles
+data/
+
+# Local environment overrides
+.env.development
+.env.local
+*.local
+
+# OS and editor
+.DS_Store
+.vscode/
+.idea/
