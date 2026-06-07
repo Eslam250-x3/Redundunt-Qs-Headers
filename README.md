@@ -28,7 +28,19 @@ This creates `data/output/review-bundle.zip` with:
 2. Deploy the page:
 
 - Push this repo to GitHub
-- Enable GitHub Pages from GitHub Actions
+- Open **Settings → Pages**
+- Under **Build and deployment**, set **Source** to **GitHub Actions**
+- Push to `main` or re-run the **Deploy Review Page** workflow from the Actions tab
+
+If deploy fails with `404 Ensure GitHub Pages has been enabled`, Pages is not enabled yet. Enable it from:
+https://github.com/Eslam250-x3/Redundunt-Qs-Headers/settings/pages
+
+Or from the terminal after `gh auth login`:
+
+```bash
+gh api repos/Eslam250-x3/Redundunt-Qs-Headers/pages -X POST -f build_type=workflow
+```
+
 - The workflow in `.github/workflows/deploy-review-page.yml` builds `interface/` and publishes it
 
 3. Review flow on the hosted page:
